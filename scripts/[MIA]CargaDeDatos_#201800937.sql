@@ -107,17 +107,36 @@ FROM temporal
 INSERT INTO actor_pelicula(id_pelicula, id_actor)
 SELECT DISTINCT pelicula.id_pelicula, actor.id_actor
 FROM temporal 
-	INNER JOIN pelicula ON pelicula.titulo = temporal.NOMBRE_PELICULA
-	INNER JOIN actor ON actor.nombre_actor = temporal.ACTOR_PELICULA;
+	INNER JOIN pelicula ON pelicula.id_pelicula = (
+		SELECT id_pelicula
+		WHERE temporal.NOMBRE_PELICULA != '-'
+		AND pelicula.titulo = temporal.NOMBRE_PELICULA
+	)
+	INNER JOIN actor ON actor.id_actor = (
+		SELECT id_actor
+		WHERE temporal.ACTOR_PELICULA != '-'
+		AND actor.nombre_actor = temporal.ACTOR_PELICULA
+	);
 
 ------------------------------------ INVENTARIO ------------------------------------
 -- LLENAR TABLA DE INVENTARIO
-INSERT INTO inventario(id_pelicula, id_tienda)
-SELECT DISTINCT pelicula.id_pelicula, tienda.id_tienda
-FROM temporal 
-	INNER JOIN pelicula ON pelicula.titulo = temporal.NOMBRE_PELICULA
-	INNER JOIN tienda ON tienda.nombre = temporal.TIENDA_PELICULA;
-;		
+INSERT INTO inventario(id_pelicula, id_tienda, cantidad)
+    SELECT pelicula.id_pelicula, tienda.id_tienda, COUNT(temporal.NOMBRE_PELICULA)
+        FROM temporal 
+        INNER JOIN pelicula ON pelicula.id_pelicula = (
+            SELECT id_pelicula
+                FROM pelicula
+                WHERE temporal.NOMBRE_PELICULA != '-'
+                AND pelicula.titulo = temporal.NOMBRE_PELICULA
+            )
+        INNER JOIN tienda ON tienda.id_tienda = (
+            SELECT id_tienda
+                FROM tienda
+                WHERE temporal.TIENDA_PELICULA != '-'
+                AND tienda.nombre = temporal.TIENDA_PELICULA
+            )
+    WHERE temporal.NOMBRE_PELICULA != '-'
+    GROUP BY pelicula.id_pelicula, tienda.id_tienda;
 
 ------------------------------------ RENTA ------------------------------------
 -- LLENAR TABLA RENTA
