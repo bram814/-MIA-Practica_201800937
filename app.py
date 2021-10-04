@@ -87,8 +87,7 @@ try:
                     print(column)
                 cont +=1
                 TABLA += '  </tr>\n'
-            TABLA+= '</table>'
-            # print(TABLA)
+            TABLA+= '</table>\n</center>'
             return TABLA
         except Exception as e:
             return f"{e}"
@@ -182,7 +181,6 @@ try:
         except Exception as e:
             return f"{e}"
     
-          
     @app.route('/consulta5')
     def consulta5():
         try:
@@ -242,11 +240,234 @@ try:
         except Exception as e:
             return f"{e}"
     
+    @app.route('/consulta6')
+    def consulta6():
+        try:
+            cont = 1
+            TABLA = '''
+            <center>
+            <h1>CONSULTA 6</h1>
+            <p>Mostrar el total de clientes y porcentaje de clientes por ciudad y país. El
+            ciento por ciento es el total de clientes por país. (Tip: Todos los
+            porcentajes por ciudad de un país deben sumar el 100%).</p>
+            <h1></h1>
+            <table class="default" border="1"  cellspacing="1">\n
+            <tr>
+                <th>No.</th>
+                <th>pais</td>
+                <th>ciudad</td>
+                <th>total_clientes</td>
+                <th>porcentaje</td>
+                
+            </tr>
+            '''
+            # CONSULTA_6 = ''' '''
+            # cur.execute(CONSULTA_6)
+            # rows = cur.fetchall()
+            # for row in rows:
+            #     TABLA += f'  <tr>\n  <td>{cont}</td>'
+            #     for column in row:
+            #         TABLA += f'''       <td>{str(column)}</td>\n'''
+            #     cont +=1
+            #     TABLA += '  </tr>\n'
+            TABLA+= '</table>\n</center>'
+            print(TABLA)
+            return TABLA
+        except Exception as e:
+            return f"{e}"
+     
+    @app.route('/consulta7')
+    def consulta7():
+        try:
+            cont = 1
+            TABLA = '''
+            <center>
+            <h1>CONSULTA 7</h1>
+            <p>Mostrar el nombre del país, la ciudad y el promedio de rentas por ciudad.
+            Por ejemplo: si el país tiene 3 ciudades, se deben sumar todas las rentas dela ciudad y dividirlo dentro 
+            de tres (número de ciudades del país).</p>
+            <h1></h1>
+            <table class="default" border="1"  cellspacing="1">\n
+            <tr>
+                <th>No.</th>
+                <th>pais</td>
+                <th>ciudad</td>
+                <th>promedio_renta</td>
+                
+            </tr>
+            '''
+            # CONSULTA_7 = ''' '''
+            # cur.execute(CONSULTA_7)
+            # rows = cur.fetchall()
+            # for row in rows:
+            #     TABLA += f'  <tr>\n  <td>{cont}</td>'
+            #     for column in row:
+            #         TABLA += f'''       <td>{str(column)}</td>\n'''
+            #     cont +=1
+            #     TABLA += '  </tr>\n'
+            TABLA+= '</table>\n</center>'
+            print(TABLA)
+            return TABLA
+        except Exception as e:
+            return f"{e}"
+    
+    @app.route('/consulta8')
+    def consulta8():
+        try:
+            cont = 1
+            TABLA = '''
+            <center>
+            <h1>CONSULTA 8</h1>
+            <p>Mostrar el nombre del país y el porcentaje de rentas de películas de la
+            categoría “Sports”. El porcentaje es sobre el número total de rentas de
+            cada país.</p>
+            <h1></h1>
+            <table class="default" border="1"  cellspacing="1">\n
+            <tr>
+                <th>No.</th>
+                <th>pais</td>
+                <th>categoria</td>
+                <th>porcentaje</td>
+                
+            </tr>
+            '''
+            CONSULTA_8 = '''
+            SELECT p.nombre AS pais, ct.nombre_categoria AS categoria,ROUND((COUNT(ct.id_categoria) / SUM(COUNT(ct.id_categoria)) OVER(PARTITION BY p.nombre)) * 100, 2) porcentaje
+                FROM Renta r 
+                    INNER JOIN cliente c ON r.id_cliente = c.id_cliente
+                    INNER JOIN direccion d ON c.id_direccion = d.id_direccion
+                    INNER JOIN ciudad cd ON d.id_ciudad = cd.id_ciudad
+                    INNER JOIN pais p ON cd.id_pais = p.id_pais
+                    INNER JOIN tienda t ON t.id_tienda = r.id_tienda
+                    INNER JOIN inventario i ON t.id_tienda = i.id_tienda
+                    INNER JOIN pelicula pl ON i.id_pelicula = pl.id_pelicula
+                    INNER JOIN categoria_pelicula pc ON pl.id_pelicula = pc.id_pelicula
+                    INNER JOIN categoria ct ON pc.id_categoria = ct.id_categoria
+                    WHERE LOWER(ct.nombre_categoria) LIKE '%sports%'
+                    GROUP BY p.nombre, ct.id_categoria
+                    ORDER BY p.nombre
+            '''
+            cur.execute(CONSULTA_8)
+            rows = cur.fetchall()
+            for row in rows:
+                TABLA += f'  <tr>\n  <td>{cont}</td>'
+                for column in row:
+                    TABLA += f'''       <td>{str(column)}</td>\n'''
+                cont +=1
+                TABLA += '  </tr>\n'
+            TABLA+= '</table>\n</center>'
+            print(TABLA)
+            return TABLA
+        except Exception as e:
+            return f"{e}"  
+
+    @app.route('/consulta9')
+    def consulta9():
+        try:
+            cont = 1
+            TABLA = '''
+            <center>
+            <h1>CONSULTA 9</h1>
+            <p>Mostrar la lista de ciudades de Estados Unidos y el número de rentas de
+            películas para las ciudades que obtuvieron más rentas que la ciudad
+            "Dayton".</p>
+            <h1></h1>
+            <table class="default" border="1"  cellspacing="1">\n
+            <tr>
+                <th>No.</th>
+                <th>pais</td>
+                <th>ciudad</td>
+                <th>no. renta</td>
+                
+            </tr>
+            '''
+            CONSULTA_9 = '''
+            SELECT p.nombre AS pais, cd.nombre AS ciudad, COUNT(r.id_cliente) as no_rentas
+                FROM renta r
+                    INNER JOIN cliente c ON r.id_cliente = c.id_cliente
+                    INNER JOIN direccion d ON c.id_direccion = d.id_direccion
+                    INNER JOIN ciudad cd ON  d.id_ciudad = cd.id_ciudad
+                    INNER JOIN pais p ON cd.id_pais = p.id_pais
+                    GROUP BY p.nombre, cd.nombre
+                    HAVING p.nombre LIKE '%United States%' 
+                    AND (COUNT(r.id_cliente::decimal) > (SELECT COUNT(r.id_cliente::decimal) 
+                                        FROM renta r
+                                        INNER JOIN cliente c ON r.id_cliente = c.id_cliente
+                                        INNER JOIN direccion d ON c.id_direccion = d.id_direccion
+                                        INNER JOIN ciudad cd ON  d.id_ciudad = cd.id_ciudad
+                                        WHERE cd.nombre LIKE '%Dayton%'))
+            '''
+            cur.execute(CONSULTA_9)
+            rows = cur.fetchall()
+            for row in rows:
+                TABLA += f'  <tr>\n  <td>{cont}</td>'
+                for column in row:
+                    TABLA += f'''       <td>{str(column)}</td>\n'''
+                cont +=1
+                TABLA += '  </tr>\n'
+            TABLA+= '</table>\n</center>'
+            print(TABLA)
+            return TABLA
+        except Exception as e:
+            return f"{e}"
+    
+    @app.route('/consulta10')
+    def consulta10():
+        try:
+            cont = 1
+            TABLA = '''
+            <center>
+            <h1>CONSULTA 10</h1>
+            <p>Mostrar todas las ciudades por país en las que predomina la renta de
+            películas de la categoría “Horror”. Es decir, hay más rentas que las otras
+            categorías.</p>
+            <h1></h1>
+            <table class="default" border="1"  cellspacing="1">\n
+            <tr>
+                <th>No.</th>
+                <th>pais</td>
+                <th>ciudad</td>
+                <th>categoria</td>
+                <th>cantidad</td>
+                <th>maxima_cantidad</td>
+                
+            </tr>
+            '''
+            CONSULTA_10 = '''
+            SELECT p.nombre as pais, cd.nombre AS ciudad, ct.nombre_categoria AS categoria, COUNT(ct.id_categoria) AS cantidad,
+                (MAX(COUNT(ct.id_categoria)) OVER (PARTITION BY cd.nombre)) AS maxima_cantidad
+                FROM renta r
+                    INNER JOIN cliente c ON r.id_cliente = c.id_cliente
+                    INNER JOIN direccion d ON c.id_direccion = d.id_direccion
+                    INNER JOIN ciudad cd ON d.id_ciudad = cd.id_ciudad
+                    INNER JOIN pais p ON cd.id_pais = p.id_pais
+                    INNER JOIN tienda t ON t.id_tienda = r.id_tienda
+                    INNER JOIN inventario i ON t.id_tienda = i.id_tienda
+                    INNER JOIN pelicula pl ON i.id_pelicula = pl.id_pelicula
+                    INNER JOIN categoria_pelicula pc ON pl.id_pelicula = pc.id_pelicula
+                    INNER JOIN categoria ct ON pc.id_categoria = ct.id_categoria
+                    WHERE ct.nombre_categoria like '%Horror%'
+                    GROUP BY cd.nombre, p.nombre, ct.id_categoria
+            '''
+            cur.execute(CONSULTA_10)
+            rows = cur.fetchall()
+            for row in rows:
+                TABLA += f'  <tr>\n  <td>{cont}</td>'
+                for column in row:
+                    TABLA += f'''       <td>{str(column)}</td>\n'''
+                cont +=1
+                TABLA += '  </tr>\n'
+            TABLA+= '</table>\n</center>'
+            print(TABLA)
+            return TABLA
+        except Exception as e:
+            return f"{e}"
 
     @app.route('/eliminarTemporal', methods=['GET']) # ELIMINA DATOS DE LA TABLA TEMPORAL
     def delete_data_temp():
         try:
             cur.execute('DELETE FROM temporal;')
+            cur.execute('DROP TABLE temporal;')
             CONECTION.commit()
         except Exception as e:
             return f"{e}"
@@ -255,11 +476,82 @@ try:
     @app.route('/eliminarModelo', methods=['GET']) # ELIMINA TABLA TEMPORAL
     def delete_temp():
         try:
-            cur.execute('DROP TABLE temporal;')
+            DELETE_MODELO = '''
+            -- ELIMINAR DATOS DE LA TABLA RENTA
+            DELETE FROM renta;
+            -- ELIMINAR DATOS DE LA TABLA INVENTARIO
+            DELETE FROM inventario;
+            -- ELIMINAR DATOS DE LA TABLA ACTOR_PELICULA
+            DELETE FROM actor_pelicula;
+            -- ELIMINAR DATOS DE LA TABLA CATEGORIA_PELICULA
+            DELETE FROM categoria_pelicula;
+            -- ELIMINAR DATOS DE LA TABLA LENGUAJE_PELICULA
+            DELETE FROM lenguaje_pelicula;
+            -- ELIMINAR DATOS DE LA TABLA ACTOR
+            DELETE FROM actor;
+            -- ELIMINAR DATOS DE LA TABLA CATEGORIA
+            DELETE FROM categoria;
+            -- ELIMINAR DATOS DE LA TABLA LENGUAJE
+            DELETE FROM lenguaje;
+            -- ELIMINAR DATOS DE LA TABLA PELICULA
+            DELETE FROM pelicula;
+            -- ELIMINAR DATOS DE LA TABLA CLASIFICACION
+            DELETE FROM clasificacion;
+            -- ELIMINAR DATOS DE LA TABLA CLIENTE
+            DELETE FROM cliente;
+            -- ELIMINAR DATOS DE LA TABLA ENCARGADO_TIENDA
+            DELETE FROM encargado_tienda;
+            -- ELIMINAR DATOS DE LA TABLA EMPLEADO
+            DELETE FROM empleado;
+            -- ELIMINAR DATOS DE LA TABLA TIENDA
+            DELETE FROM tienda;
+            -- ELIMINAR DATOS DE DIRECCION
+            DELETE FROM direccion;
+            -- ELIMINAR DATOS CIUDAD
+            DELETE FROM ciudad;
+            -- ELIMINA LOS DATOS DE LA TEMPORAL
+            DELETE FROM pais;
+            -- ELIMINAR TABLA RENTA
+            DROP TABLE renta;
+            -- ELIMINAR TABLA INVENTARIO
+            DROP TABLE inventario;
+            -- ELIMINAR TABLA ACTOR_PELICULA
+            DROP TABLE actor_pelicula;
+            -- ELIMINAR TABLA CATEGORIA_PELICULA
+            DROP TABLE categoria_pelicula;
+            -- ELIMINAR TABLA LENGUAJE_PELICULA
+            DROP TABLE lenguaje_pelicula;
+            -- ELIMINAR TABLA ACTOR
+            DROP TABLE actor;
+            -- ELIMINAR TABLA CATEGORIA
+            DROP TABLE categoria;
+            -- ELIMINAR TABLA LENGUAJE
+            DROP TABLE lenguaje;
+            -- ELIMINAR TABLA DE LA TABLA PELICULA
+            DROP TABLE pelicula;
+            -- ELIMINAR TABLA CLASIFICACION
+            DROP TABLE clasificacion;
+            -- ELIMINAR TABLA CLIENTE
+            DROP TABLE cliente;
+            -- ELIMINAR TABLA ENCARGADO_TIENDA
+            DROP TABLE encargado_tienda;
+            -- ELIMINAR TABLA EMPLEADO
+            DROP TABLE empleado;
+            -- ELIMINAR TIENDA
+            DROP TABLE tienda;
+            -- ELMINAR TABLA DIRECCION
+            DROP TABLE direccion;
+            -- ELMINAR TABLA CIUDAD
+            DROP TABLE ciudad;
+            -- ELIMINA LA TABLA PAIS
+            DROP TABLE pais;
+            
+            '''
+            cur.execute(DELETE_MODELO)
             CONECTION.commit()
         except Exception as e:
             return f"{e}"
-        return "TABLA TEMPORAL ELIMINADA!"
+        return "MODELO ELIMINADO!"
 
     @app.route('/cargarTemporal', methods=['GET'])
     def cargar_temporal():
