@@ -256,20 +256,35 @@ try:
                 <th>No.</th>
                 <th>pais</td>
                 <th>ciudad</td>
-                <th>total_clientes</td>
-                <th>porcentaje</td>
+                <th>promedio</td>
                 
             </tr>
             '''
-            # CONSULTA_6 = ''' '''
-            # cur.execute(CONSULTA_6)
-            # rows = cur.fetchall()
-            # for row in rows:
-            #     TABLA += f'  <tr>\n  <td>{cont}</td>'
-            #     for column in row:
-            #         TABLA += f'''       <td>{str(column)}</td>\n'''
-            #     cont +=1
-            #     TABLA += '  </tr>\n'
+            CONSULTA_6 = '''
+            SELECT p.nombre AS pais,ci.nombre AS ciudad,((COUNT(c.id_cliente))*100 /(
+                SELECT COUNT(cl.id_cliente)
+                    FROM cliente cl
+                        INNER JOIN direccion d ON cl.id_direccion = d.id_direccion
+                        INNER JOIN ciudad ci on d.id_ciudad = ci.id_ciudad
+                        INNER JOIN pais z ON ci.id_pais = z.id_pais
+                        WHERE p.nombre = z.nombre
+                        GROUP BY (z.nombre)
+                )) AS promedio
+                FROM cliente c
+                    INNER JOIN direccion d ON c.id_direccion = d.id_direccion
+                    INNER JOIN ciudad ci on d.id_ciudad = ci.id_ciudad
+                    INNER JOIN pais p ON ci.id_pais = p.id_pais
+                    GROUP BY (p.nombre,ci.nombre)
+                    ORDER BY p.nombre ASC;
+            '''
+            cur.execute(CONSULTA_6)
+            rows = cur.fetchall()
+            for row in rows:
+                TABLA += f'  <tr>\n  <td>{cont}</td>'
+                for column in row:
+                    TABLA += f'''       <td>{str(column)}</td>\n'''
+                cont +=1
+                TABLA += '  </tr>\n'
             TABLA+= '</table>\n</center>'
             print(TABLA)
             return TABLA
@@ -290,21 +305,40 @@ try:
             <table class="default" border="1"  cellspacing="1">\n
             <tr>
                 <th>No.</th>
-                <th>pais</td>
-                <th>ciudad</td>
-                <th>promedio_renta</td>
+                <th>pais</th>
+                <th>ciudad</th>
+                <th>renta</th>
+                <th>promedio_renta</th>
                 
             </tr>
             '''
-            # CONSULTA_7 = ''' '''
-            # cur.execute(CONSULTA_7)
-            # rows = cur.fetchall()
-            # for row in rows:
-            #     TABLA += f'  <tr>\n  <td>{cont}</td>'
-            #     for column in row:
-            #         TABLA += f'''       <td>{str(column)}</td>\n'''
-            #     cont +=1
-            #     TABLA += '  </tr>\n'
+            CONSULTA_7 = '''
+            SELECT p.nombre AS "pais", ci.nombre AS ciudad,COUNT(ci.id_pais) as "renta", (COUNT(ci.id_ciudad))/(
+                SELECT COUNT(r.id_renta)
+                    FROM renta r
+                        INNER JOIN cliente c ON c.id_cliente = r.id_cliente
+                        INNER JOIN direccion d ON d.id_direccion = c.id_direccion
+                        INNER JOIN ciudad cd ON cd.id_ciudad = d.id_ciudad
+                        INNER JOIN pais z ON z.id_pais = cd.id_pais
+                        WHERE ci.nombre = cd.nombre
+                        GROUP BY ci.nombre, cd.nombre
+            ) AS "promedio"
+            FROM renta r
+                INNER JOIN cliente c ON r.id_cliente = c.id_cliente
+                INNER JOIN direccion d ON d.id_direccion = c.id_direccion
+                INNER JOIN ciudad ci ON ci.id_ciudad = d.id_ciudad
+                INNER JOIN pais p ON p.id_pais = ci.id_pais
+                GROUP BY (p.nombre,ci.nombre)
+                ORDER BY p.nombre
+            '''
+            cur.execute(CONSULTA_7)
+            rows = cur.fetchall()
+            for row in rows:
+                TABLA += f'  <tr>\n  <td>{cont}</td>'
+                for column in row:
+                    TABLA += f'''       <td>{str(column)}</td>\n'''
+                cont +=1
+                TABLA += '  </tr>\n'
             TABLA+= '</table>\n</center>'
             print(TABLA)
             return TABLA
@@ -598,7 +632,7 @@ try:
                 CLASIFICACION VARCHAR,
                 LENGUAJE_PELICULA VARCHAR,
                 CATEGORIA_PELICULA VARCHAR,
-                ACTOR_PELICULA VARCHAR)'''
+                ACTOR_PELICULA VARCHAR);'''
             cur.execute(TABLE_TEMPORAL)
             # CARGA LOS DATOS A LA TABLA TEMPORAL
             CHARGE_MASIVE_CSV = '''COPY temporal from '/home/abraham/Escritorio/BlockbusterData.csv' USING delimiters ';' csv header encoding 'windows-1251';'''
